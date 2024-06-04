@@ -1,7 +1,7 @@
-﻿using Basket.API.Models;
+﻿using Basket.API.GrpcService;
+using Basket.API.Models;
 using Basket.API.Repositories;
 using CoreApiResponse;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
 
@@ -12,10 +12,12 @@ namespace Basket.API.Controllers
     public class BasketController : BaseController
     {
         private readonly IBasketRepository _basketRepository;
+        private readonly DiscountGrpcService _discountGrpcService;
 
-        public BasketController(IBasketRepository basketRepository)
+        public BasketController(IBasketRepository basketRepository, DiscountGrpcService discountGrpcService)
         {
             _basketRepository = basketRepository;
+            _discountGrpcService = discountGrpcService;
         }
 
         [HttpGet]
@@ -41,6 +43,13 @@ namespace Basket.API.Controllers
         {
             try
             {
+                //Comunication discount.grpc
+                //calculate latest price
+                foreach (var item in bastket.Items) 
+                {
+                    var coupon = await _discountGrpcService.GetDiscount(item.ProductId);
+                    item.Price -= coupon.Amount;
+                }
                 var basket = await _basketRepository.UpdateBasket(bastket);
                 return CustomResult("Carrito modificado", basket);
 
@@ -50,7 +59,7 @@ namespace Basket.API.Controllers
                 return CustomResult(ex.Message, HttpStatusCode.BadRequest);
 
             }
-        }
+            }
 
         [HttpDelete]
         [ProducesResponseType((typeof(void)),(int)HttpStatusCode.OK)]
