@@ -26,7 +26,7 @@ namespace Ordering.Application.Features.Orders.Commands.CreateOrder
             bool isOrderPlaced = await _orderRepository.AddAsync(order);
             if (isOrderPlaced)
             {
-                Email email = new();
+                EmailMessage email = new();
                 email.Subject = "Tu orden ha sido enviada";
                 email.To = order.UserName;
                 email.Body = $"Estimado(a) {order.FirstName + " " + order.LastName} <br/><br/> Estamos complacidos de que recibas tu orden #{order.Id}. <br/> Gracias por preferirnos "; 
