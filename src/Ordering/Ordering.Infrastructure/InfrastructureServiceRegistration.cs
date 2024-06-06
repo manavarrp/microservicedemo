@@ -3,6 +3,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Ordering.Application.Contracts.Infrastructure;
 using Ordering.Application.Contracts.Persistence;
+using Ordering.Infrastructure.Mail;
 using Ordering.Infrastructure.Persistence;
 using Ordering.Infrastructure.Repositories;
 
@@ -14,7 +15,7 @@ namespace Ordering.Infrastructure
         {
             services.AddDbContext<OrderDbContext>(options => options.UseSqlServer(configuration.GetConnectionString("OrderDB")));
             services.AddScoped<IOrderRepository, OrderRepository>();
-            services.AddTransient<IEmailService, IEmailService>();
+            services.AddTransient<IEmailService, EmailService>();
             return services;
         }
     }
