@@ -1,4 +1,5 @@
 ﻿using CoreApiResponse;
+using FluentValidation;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Ordering.Application.Features.Orders.Commands.CreateOrder;
@@ -43,6 +44,18 @@ namespace Ordering.Api.Controllers
         {
             try
             {
+                // Crear una instancia del validador
+                var validator = new CreateOrderCommandValidation();
+
+                // Validar el comando
+                var validationResult = await validator.ValidateAsync(orderCommand);
+
+                if (!validationResult.IsValid)
+                {
+                    // Si la validación falla, devolver los errores
+                    return CustomResult(string.Join("; ", validationResult.Errors.Select(e => e.ErrorMessage)), HttpStatusCode.BadRequest);
+                }
+
                 var isOrderPlaced = await _mediator.Send(orderCommand);
                 if (isOrderPlaced)
                 {
@@ -65,6 +78,16 @@ namespace Ordering.Api.Controllers
         {
             try
             {
+                var validator = new UpdateOrderCommandValidator();
+
+                // Validar el comando
+                var validationResult = await validator.ValidateAsync(orderCommand);
+
+                if (!validationResult.IsValid)
+                {
+                    // Si la validación falla, devolver los errores
+                    return CustomResult(string.Join("; ", validationResult.Errors.Select(e => e.ErrorMessage)), HttpStatusCode.BadRequest);
+                }
                 var isModified = await _mediator.Send(orderCommand);
                 if (isModified)
                 {
