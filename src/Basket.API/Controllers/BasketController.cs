@@ -1,7 +1,10 @@
-﻿using Basket.API.GrpcService;
+﻿using AutoMapper;
+using Basket.API.GrpcService;
 using Basket.API.Models;
 using Basket.API.Repositories;
 using CoreApiResponse;
+using EventBus.Message.Event;
+using MassTransit;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
 
@@ -13,11 +16,15 @@ namespace Basket.API.Controllers
     {
         private readonly IBasketRepository _basketRepository;
         private readonly DiscountGrpcService _discountGrpcService;
+        private readonly IPublishEndpoint _publishEndpoint;
+        IMapper _mapper;
 
-        public BasketController(IBasketRepository basketRepository, DiscountGrpcService discountGrpcService)
+        public BasketController(IBasketRepository basketRepository, DiscountGrpcService discountGrpcService, IPublishEndpoint publishEndpoint, IMapper mapper)
         {
             _basketRepository = basketRepository;
             _discountGrpcService = discountGrpcService;
+            _publishEndpoint = publishEndpoint;
+            _mapper = mapper;
         }
 
         [HttpGet]
@@ -76,6 +83,25 @@ namespace Basket.API.Controllers
                 return CustomResult(ex.Message, HttpStatusCode.BadRequest);
 
             }
+        }
+
+        [HttpPost]
+        [ProducesResponseType((typeof(void)), (int)HttpStatusCode.OK)]
+        public async Task<IActionResult> Checkout([FromBody] BasketCheckout checkout)
+        {
+            var basket = await _basketRepository.GetBasket(checkout.UserName);
+            if (basket == null)
+            {
+                return CustomResult("Carrito esta vacio", HttpStatusCode.BadRequest);
+            }
+            //send checkout event to RabbitMQ
+            var eventMessage = _mapper.Map<BasketCheckoutEvent>(checkout);
+            eventMessage.TotalPrice = basket.TotalPrice;
+            await _publishEndpoint.Publish(eventMessage);
+
+            //remove basket
+            await _basketRepository.DeleteBasket(checkout.UserName);
+            return CustomResult("Orden ha sido puesta");
         }
     }
 }

@@ -2,6 +2,7 @@ using Basket.API.GrpcService;
 using Basket.API.Repositories;
 using Discount.Grpc.Protos;
 using MassTransit;
+using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,7 +18,7 @@ options.Address = new Uri(builder.Configuration.GetValue<string>("GrpcSettings:D
 });
 builder.Services.AddScoped<DiscountGrpcService>();
 builder.Services.AddScoped<IBasketRepository, BasketRepository>();
-
+builder.Services.AddAutoMapper(Assembly.GetExecutingAssembly());
 //RabbitMQ Configuration
 builder.Services.AddMassTransit(config =>
 {

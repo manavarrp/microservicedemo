@@ -5,7 +5,7 @@ namespace Ordering.Application.Features.Orders.Commands.CreateOrder
     public class CreateOrderCommand : IRequest<bool>
     {
         public string UserName { get; set; }
-        public Decimal TotalPrice { get; set; }
+        public decimal TotalPrice { get; set; }
 
         //Billing Address
         public string FirstName { get; set; }

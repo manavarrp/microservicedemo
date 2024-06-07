@@ -1,6 +1,6 @@
-﻿namespace EventBus.Message.Event
+﻿namespace Basket.API.Models
 {
-    public class BasketCheckoutEvent : BaseEvent
+    public class BasketCheckout
     {
         public string UserName { get; set; }
         public decimal TotalPrice { get; set; }
@@ -22,9 +22,5 @@
         public string Expiration { get; set; }
         public int PaymentMethod { get; set; }
 
-        public string CreatedBy { get; set; }
-        public DateTime CreatedDate { get; set; }
-        public string UpdatedBy { get; set; } = string.Empty;
-        public DateTime? UpdateDate { get; set; }
     }
 }

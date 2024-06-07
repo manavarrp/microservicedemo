@@ -6,7 +6,7 @@ namespace Ordering.Domain.Models
     {
         public int Id { get; set; }
         public string UserName { get; set; }
-        public Decimal TotalPrice { get; set; }
+        public decimal TotalPrice { get; set; }
 
         //Billing Address
         public string FirstName { get; set; }
