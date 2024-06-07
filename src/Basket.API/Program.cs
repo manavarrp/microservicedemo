@@ -1,6 +1,7 @@
 using Basket.API.GrpcService;
 using Basket.API.Repositories;
 using Discount.Grpc.Protos;
+using MassTransit;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,6 +17,15 @@ options.Address = new Uri(builder.Configuration.GetValue<string>("GrpcSettings:D
 });
 builder.Services.AddScoped<DiscountGrpcService>();
 builder.Services.AddScoped<IBasketRepository, BasketRepository>();
+
+//RabbitMQ Configuration
+builder.Services.AddMassTransit(config =>
+{
+    config.UsingRabbitMq((ctx, cfg) =>
+    {
+        cfg.Host(builder.Configuration["EventBusSettings:RabbitMqHost"]);
+    });
+});
 
 var app = builder.Build();
 
